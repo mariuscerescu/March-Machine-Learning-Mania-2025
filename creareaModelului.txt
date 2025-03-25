@@ -1,0 +1,125 @@
+# Procesul de creare a modelului pentru March Machine Learning Mania 2025
+
+## Prezentare generală
+Acest document descrie procesul complet de creare a modelului pentru competiția March Machine Learning Mania 2025, care implică predicția rezultatelor turneelor de baschet NCAA pentru echipele masculine și feminine. Procesul include următoarele etape principale:
+
+1. Reducerea dimensiunii setului de date (datasetReducer.py)
+2. Procesarea datelor (dataProcessing.py)
+3. Antrenarea modelului de machine learning (MLModel.py)
+4. Crearea fișierului de submission (createSubmissionFile.py)
+
+## 1. Reducerea dimensiunii setului de date (datasetReducer.py)
+
+Funcția principală a scriptului datasetReducer.py este de a reduce dimensiunea fișierelor CSV mari pentru a facilita procesarea ulterioară. Acesta implementează următoarele funcționalități:
+
+- Reduce numărul de rânduri din fișierele CSV mari la un număr maxim specificat (implicit 10,000 rânduri)
+- Pentru fișierele care conțin o coloană 'Season', implementează o eșantionare stratificată pentru a păstra mai multe date din sezoanele recente
+- Pentru alte fișiere, implementează o eșantionare aleatorie simplă
+- Raportează dimensiunea inițială și finală a fișierelor, precum și procentul de reducere
+
+Fișierele mari care sunt procesate includ:
+- MMasseyOrdinals.csv (~119 MB)
+- MRegularSeasonDetailedResults.csv (~11.5 MB)
+- SeedBenchmarkStage1.csv (~10.4 MB)
+- SampleSubmissionStage1.csv (~9.9 MB)
+- WRegularSeasonDetailedResults.csv (~7.9 MB)
+- și altele
+
+Fișierele reduse sunt salvate într-un director separat 'reducedDataset' pentru a păstra datele originale intacte.
+
+## 2. Procesarea datelor (dataProcessing.py)
+
+Scriptul dataProcessing.py implementează clasa BasketballDataProcessor care este responsabilă pentru:
+
+- Încărcarea datelor de baschet (separat pentru bărbați și femei)
+- Precalcularea statisticilor pe sezoane pentru fiecare echipă
+- Crearea caracteristicilor (features) pentru meciurile între două echipe
+- Generarea seturilor de date de antrenare pentru modele
+
+Etapele principale includ:
+
+### Încărcarea datelor
+- Încarcă toate fișierele CSV relevante (echipe, sezoane, rezultate sezon regular, rezultate turneu, etc.)
+- Gestionează erorile și cazurile când anumite fișiere nu sunt disponibile
+
+### Precalcularea statisticilor
+Calculează statistici la nivel de sezon pentru fiecare echipă:
+- Statistici de bază: rata de victorii, meciuri totale, puncte marcate, puncte primite, diferența de puncte
+- Statistici detaliate (când sunt disponibile): procente de aruncări, recuperări, etc.
+- Stochează aceste statistici în cache pentru a evita recalcularea
+
+### Crearea caracteristicilor pentru meciuri
+Pentru fiecare pereche de echipe, creează un set de caracteristici care compară statisticile celor două echipe:
+- Diferențe în ratele de victorii
+- Diferențe în punctele marcate și primite
+- Diferențe în statisticile avansate (când sunt disponibile)
+
+### Generarea seturilor de antrenare
+- Creează un set de date de antrenare care include toate meciurile din sezonul regular
+- Pentru fiecare meci, generează două exemple de antrenare (din perspectiva fiecărei echipe)
+- Adaugă variabila țintă (1 pentru victorie, 0 pentru înfrângere)
+
+Rezultatul final constă în două seturi de date (pentru bărbați și femei) salvate în fișierele CSV 'mens_training_data.csv' și 'womens_training_data.csv'.
+
+## 3. Antrenarea modelului (MLModel.py)
+
+Scriptul MLModel.py este responsabil pentru antrenarea modelelor de machine learning folosind seturile de date generate anterior. Funcționalitățile principale includ:
+
+### Încărcarea și pregătirea datelor
+- Încarcă seturile de date de antrenare
+- Identifică coloanele de caracteristici și separă variabila țintă
+- Tratează valorile lipsă
+
+### Antrenarea și evaluarea modelelor
+- Divizează datele în seturi de antrenare și testare (80% antrenare, 20% testare)
+- Creează un pipeline de preprocesare care include imputarea valorilor lipsă și standardizarea
+- Antrenează un model LightGBM cu parametri optimizați
+- Evaluează performanța modelului folosind metrici precum acuratețea, log loss și AUC-ROC
+- Calculează și vizualizează importanța caracteristicilor
+
+### Salvarea modelelor
+- Salvează modelele antrenate în directorul 'models'
+- Salvează pipeline-ul de preprocesare pentru utilizare ulterioară
+- Generează și salvează grafice de importanță a caracteristicilor
+
+Modelele sunt antrenate separat pentru baschetul masculin și feminin, permițând compararea performanței lor și identificarea diferențelor în factorii determinanți ai rezultatelor meciurilor.
+
+## 4. Crearea fișierului de submission (createSubmissionFile.py)
+
+Ultima etapă este generarea fișierului de submission pentru competiție, implementată în scriptul createSubmissionFile.py. Acest script:
+
+### Încărcarea datelor necesare
+- Încarcă fișierul de submission exemplu pentru a determina formatul corect
+- Încarcă datele despre echipe
+- Încarcă modelele antrenate și pipeline-urile de preprocesare
+
+### Generarea tuturor meciurilor posibile
+- Creează toate combinațiile posibile de echipe masculine și feminine
+- Generează ID-uri unice pentru fiecare meci potențial conform formatului competiției
+
+### Estimarea puterii echipelor
+- Calculează un scor de putere pentru fiecare echipă bazat pe datele de antrenare
+- Folosește aceste scoruri pentru a accelera predicțiile pentru un număr mare de meciuri
+
+### Predicția rezultatelor meciurilor
+- Pentru fiecare meci posibil, prezice probabilitatea de victorie pentru echipa cu ID-ul mai mic
+- Folosește o combinație de scoruri de putere și predicții ale modelului pentru eficiență
+
+### Crearea fișierului de submission
+- Generează un fișier CSV în formatul cerut de competiție
+- Implementează strategii de procesare în loturi pentru a gestiona eficient memoria
+- Verifică formatul final pentru a asigura conformitatea cu cerințele competiției
+
+Fișierul final 'submission.csv' conține predicții pentru toate meciurile posibile între echipele de baschet masculin și feminin pentru sezonul 2025.
+
+## Concluzie
+
+Procesul complet de modelare combină tehnici de procesare a datelor, inginerie a caracteristicilor și machine learning pentru a prezice rezultatele meciurilor de baschet NCAA. Abordarea folosește date istorice pentru a identifica patterns-uri și relații între statisticile echipelor și rezultatele meciurilor.
+
+Provocările principale ale proiectului includ:
+- Gestionarea unor seturi de date mari și diverse
+- Crearea de caracteristici relevante care captează dinamica meciurilor de baschet
+- Antrenarea modelelor eficiente care pot generaliza bine la meciuri viitoare
+- Generarea eficientă a predicțiilor pentru toate meciurile posibile (un număr foarte mare)
+
+Modelele rezultate oferă predicții probabilistice pentru meciurile din turneul NCAA 2025, care vor fi evaluate folosind scorul Brier conform cerințelor competiției.

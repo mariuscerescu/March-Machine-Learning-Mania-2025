@@ -1,0 +1,101 @@
+================================================================================
+NCAA Basketball Tournament Prediction Model Training
+Started at: 2025-03-19 12:25:31
+================================================================================
+Loading dataset from mens_training_data.csv...
+Dataset shape: (7320, 36)
+Features available: 35
+Columns with missing values: 0
+
+Training men's model
+Training set size: (5856, 32)
+Testing set size: (1464, 32)
+Training model...
+[LightGBM] [Info] Number of positive: 2928, number of negative: 2928
+[LightGBM] [Info] Auto-choosing col-wise multi-threading, the overhead of testing was 0.001030 seconds.
+You can set `force_col_wise=true` to remove the overhead.
+[LightGBM] [Info] Total Bins 6553
+[LightGBM] [Info] Number of data points in the train set: 5856, number of used features: 32
+[LightGBM] [Info] [binary:BoostFromScore]: pavg=0.500000 -> initscore=0.000000
+C:\Users\mariu\AppData\Roaming\Python\Python312\site-packages\sklearn\utils\validation.py:2739: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\mariu\AppData\Roaming\Python\Python312\site-packages\sklearn\utils\validation.py:2739: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+
+Model Evaluation (men's):
+Accuracy: 0.9214
+Log Loss: 0.1718
+ROC AUC: 0.9863
+
+Top 15 Important Features:
+             feature  importance
+8        WinRateDiff         446
+0       Team1WinRate         269
+1       Team2WinRate         266
+9   PointsScoredDiff         260
+31      Team2_FT_pct         258
+7    Team2PointsDiff         231
+6    Team1PointsDiff         225
+26      Team2_FTA_pg         217
+18      Team1_FG_pct         200
+20      Team1_FT_pct         193
+11      Team1_FGA_pg         189
+28       Team2_DR_pg         185
+19     Team1_FG3_pct         184
+24     Team2_FGA3_pg         182
+17       Team1_DR_pg         182
+Model saved to models/mens_model.txt
+Loading dataset from womens_training_data.csv...
+Dataset shape: (10716, 36)
+Features available: 35
+Columns with missing values: 22
+
+Training women's model
+Training set size: (8572, 32)
+Testing set size: (2144, 32)
+Training model...
+[LightGBM] [Info] Number of positive: 4286, number of negative: 4286
+[LightGBM] [Info] Auto-choosing col-wise multi-threading, the overhead of testing was 0.002349 seconds.
+You can set `force_col_wise=true` to remove the overhead.
+[LightGBM] [Info] Total Bins 7340
+[LightGBM] [Info] Number of data points in the train set: 8572, number of used features: 32
+[LightGBM] [Info] [binary:BoostFromScore]: pavg=0.500000 -> initscore=0.000000
+C:\Users\mariu\AppData\Roaming\Python\Python312\site-packages\sklearn\utils\validation.py:2739: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\mariu\AppData\Roaming\Python\Python312\site-packages\sklearn\utils\validation.py:2739: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+
+Model Evaluation (women's):
+Accuracy: 0.8745
+Log Loss: 0.2235
+ROC AUC: 0.9673
+
+Top 15 Important Features:
+               feature  importance
+8          WinRateDiff         530
+0         Team1WinRate         334
+1         Team2WinRate         328
+9     PointsScoredDiff         278
+7      Team2PointsDiff         229
+6      Team1PointsDiff         220
+11        Team1_FGA_pg         210
+20        Team1_FT_pct         196
+31        Team2_FT_pct         191
+29        Team2_FG_pct         189
+18        Team1_FG_pct         187
+28         Team2_DR_pg         182
+21        Team2_FGM_pg         180
+4   Team1PointsAllowed         176
+10        Team1_FGM_pg         173
+Model saved to models/womens_model.txt
+
+========================================
+Model Performance Comparison
+========================================
+Metric          Mens Model      Womens Model   
+--------------- --------------- ---------------
+Accuracy        0.9214          0.8745         
+Log Loss        0.1718          0.2235         
+ROC AUC         0.9863          0.9673         
+
+Model training complete!
